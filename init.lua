@@ -1,6 +1,20 @@
 -- name_restrictions mod by ShadowNinja
 -- License: WTFPL
 
+----------------------------
+-- Restriction exemptions --
+----------------------------
+-- For legitimate player names that are caught by the filters.
+
+local exemptions = {}
+local temp = minetest.setting_get("restriction_exempted_names")
+temp = temp and temp:split() or {}
+for _, allowed_name in pairs(temp) do
+	exemptions[allowed_name] = true
+end
+temp = nil
+
+
 ---------------------
 -- Simple matching --
 ---------------------
@@ -67,7 +81,7 @@ minetest.register_chatcommand("choosecase", {
 local similar_chars = {
 	-- Only A-Z, a-z, 1-9, dash, and underscore are allowed in playernames
 	"A4",
-	"B8"
+	"B8",
 	"COco0",
 	"Ee3",
 	"Gg69",
@@ -102,8 +116,11 @@ all_chars = all_chars .. "]"
 
 
 minetest.register_on_prejoinplayer(function(name, ip)
+	if exemptions[name] then return end
+
 	local re = name:gsub(all_chars, char_map)
 	re = "^[_-]*" .. re .. "[_-]*$"
+
 	for authName, _ in pairs(minetest.auth_table) do
 		if authName ~= name and authName:match(re) then
 			return "Your name is too similar to annother player's name."
@@ -111,4 +128,76 @@ minetest.register_on_prejoinplayer(function(name, ip)
 	end
 end)
 
+
+
+-----------------
+-- Name length --
+-----------------
+
+local min_name_len = tonumber(minetest.setting_get("minimum_name_length")) or 3
+
+minetest.register_on_prejoinplayer(function(name, ip)
+	if exemptions[name] then return end
+
+	if #name < min_name_len then
+		return "Your player name is too short, please try a longer name."
+	end
+end)
+
+
+----------------------
+-- Pronounceability --
+----------------------
+
+-- Original implementation (in Python) by sfan5
+local function pronounceable(text)
+	local pronounceable = 0
+	local nonpronounceable = 0
+	local cn = 0
+	local lastc = ""
+	for c in text:lower():gmatch(".") do
+		if c:find("[aeiou0-9_-]") then
+			if not c:find("[0-9]") then
+				if cn > 2 then
+					nonpronounceable = nonpronounceable + 1
+				else
+					pronounceable = pronounceable + 1
+				end
+			end
+			cn = 0
+		else
+			if cn == 1 and lastc == c and lastc ~= 's' then
+				nonpronounceable = nonpronounceable + 1
+				cn = 0
+			end
+			if cn > 2 then
+				nonpronounceable = nonpronounceable + 1
+				cn = 0
+			end
+			if lastc:find("[aeiou]") then
+				pronounceable = pronounceable + 1
+				cn = 0
+			end
+			if not (c == "r" and lastc:find("[aipfom]")) and
+					not (lastc == "c" and c == "h") then
+				cn = cn + 1
+			end
+		end
+		lastc = c
+	end
+	if cn > 0 then
+		nonpronounceable = nonpronounceable + 1
+	end
+	return (pronounceable >= nonpronounceable)
+end
+
+
+minetest.register_on_prejoinplayer(function(name, ip)
+	if exemptions[name] then return end
+
+	if not pronounceable(name) then
+		return "Your player name does not seem to be pronounceable."
+			.."  Please choose a more pronounceable name."
+	end
+end)
 
