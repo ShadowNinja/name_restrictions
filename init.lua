@@ -120,6 +120,7 @@ all_chars = all_chars .. "]"
 minetest.register_on_prejoinplayer(function(name, ip)
 	if exemptions[name] then return end
 
+	-- Generate a regular expression to match all similar names
 	local re = name:gsub(all_chars, char_map)
 	re = "^[_-]*" .. re .. "[_-]*$"
 
