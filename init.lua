@@ -153,7 +153,7 @@ end)
 ----------------------
 
 -- Original implementation (in Python) by sfan5
-local function pronounceable(text)
+local function pronounceable(pronounceability, text)
 	local pronounceable = 0
 	local nonpronounceable = 0
 	local cn = 0
@@ -191,16 +191,24 @@ local function pronounceable(text)
 	if cn > 0 then
 		nonpronounceable = nonpronounceable + 1
 	end
-	return (pronounceable >= nonpronounceable)
+	return pronounceable * pronounceability >= nonpronounceable
 end
 
+-- Pronounceability factor:
+--   nil = Checking disabled.
+--   0   = Everything's unpronounceable.
+--   0.5 = Strict checking.
+--   1   = Normal checking.
+--   2   = Relaxed checking.
+local pronounceability = tonumber(minetest.setting_get("name_restrictions.pronounceability"))
+if pronounceability then
+	minetest.register_on_prejoinplayer(function(name, ip)
+		if exemptions[name] then return end
 
-minetest.register_on_prejoinplayer(function(name, ip)
-	if exemptions[name] then return end
-
-	if not pronounceable(name) then
-		return "Your player name does not seem to be pronounceable."
-			.."  Please choose a more pronounceable name."
-	end
-end)
+		if not pronounceable(pronounceability, name) then
+			return "Your player name does not seem to be pronounceable."
+				.."  Please choose a more pronounceable name."
+		end
+	end)
+end
 
