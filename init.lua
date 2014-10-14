@@ -49,7 +49,7 @@ minetest.register_on_prejoinplayer(function(name, ip)
 		if iname:lower() == lname and iname ~= name then
 			return "Sorry, someone else is already using this"
 				.." name.  Please pick another name."
-				.."  Annother posibility is that you used the"
+				.."  Annother possibility is that you used the"
 				.." wrong case for your name."
 		end
 	end
@@ -78,7 +78,7 @@ minetest.register_chatcommand("choosecase", {
 ------------------------
 -- Anti-impersonation --
 ------------------------
--- Prevents names that are too similar to annother player's name.
+-- Prevents names that are too similar to another player's name.
 
 local similar_chars = {
 	-- Only A-Z, a-z, 1-9, dash, and underscore are allowed in playernames
@@ -126,7 +126,7 @@ minetest.register_on_prejoinplayer(function(name, ip)
 
 	for authName, _ in pairs(minetest.auth_table) do
 		if authName ~= name and authName:match(re) then
-			return "Your name is too similar to annother player's name."
+			return "Your name is too similar to another player's name."
 		end
 	end
 end)
