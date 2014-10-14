@@ -7,7 +7,7 @@
 -- For legitimate player names that are caught by the filters.
 
 local exemptions = {}
-local temp = minetest.setting_get("restriction_exempted_names")
+local temp = minetest.setting_get("name_restrictions.exemptions")
 temp = temp and temp:split() or {}
 for _, allowed_name in pairs(temp) do
 	exemptions[allowed_name] = true
@@ -134,7 +134,7 @@ end)
 -- Name length --
 -----------------
 
-local min_name_len = tonumber(minetest.setting_get("minimum_name_length")) or 3
+local min_name_len = tonumber(minetest.setting_get("name_restrictions.minimum_name_length")) or 3
 
 minetest.register_on_prejoinplayer(function(name, ip)
 	if exemptions[name] then return end
