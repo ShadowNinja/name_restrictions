@@ -21,12 +21,16 @@ exemptions["singleplayer"] = true
 -- Simple matching --
 ---------------------
 
+local msg_guest = "Guest accounts are disallowed on this server.  "..
+		"Please choose a proper name and try again."
+local msg_misleading = "Your player name is misleading.  "..
+		"Please choose a more appropriate name."
 local disallowed = {
-	["^guest[0-9]+"] = "Guest accounts are disallowed on this server.  "..
-	                   "Please choose a proper username and try again.",
-	["adm[1il]n"]    = "Misleading nickname.",
-	["[0o]wn[e3]r"]  = "Misleading nickname.",
-	["^[0-9]+$"]     = "All-numeric usernames are disallowed on this server.",
+	["^guest[0-9]+"] = msg_guest,
+	["^squeakecrafter[0-9]+"] = msg_guest,
+	["adm[1il]n"] = msg_misleading,
+	["[0o]wn[e3]r"]  = msg_misleading,
+	["^[0-9]+$"] = "All-numeric usernames are disallowed on this server.",
 }
 
 minetest.register_on_prejoinplayer(function(name, ip)
