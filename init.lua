@@ -34,6 +34,9 @@ local disallowed = {
 }
 
 minetest.register_on_prejoinplayer(function(name, ip)
+	if exemptions[name] then return end
+	
+	-- Check for disallowed and unexemptioned names
 	local lname = name:lower()
 	for re, reason in pairs(disallowed) do
 		if lname:find(re) then
@@ -48,6 +51,9 @@ end)
 ------------------------
 
 minetest.register_on_prejoinplayer(function(name, ip)
+	if exemptions[name] then return end
+	
+	-- Check for used names
 	local lname = name:lower()
 	for iname, data in pairs(minetest.auth_table) do
 		if iname:lower() == lname and iname ~= name then
