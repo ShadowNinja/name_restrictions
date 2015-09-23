@@ -17,6 +17,7 @@ temp = nil
 exemptions[minetest.setting_get("name")] = true
 exemptions["singleplayer"] = true
 
+
 ---------------------
 -- Simple matching --
 ---------------------
@@ -34,6 +35,9 @@ local disallowed = {
 }
 
 minetest.register_on_prejoinplayer(function(name, ip)
+	if exemptions[name] then return end
+
+	-- Check for disallowed names
 	local lname = name:lower()
 	for re, reason in pairs(disallowed) do
 		if lname:find(re) then
@@ -48,6 +52,9 @@ end)
 ------------------------
 
 minetest.register_on_prejoinplayer(function(name, ip)
+	if exemptions[name] then return end
+
+	-- Check for used names
 	local lname = name:lower()
 	for iname, data in pairs(minetest.auth_table) do
 		if iname:lower() == lname and iname ~= name then
@@ -85,7 +92,7 @@ minetest.register_chatcommand("choosecase", {
 -- Prevents names that are too similar to another player's name.
 
 local similar_chars = {
-	-- Only A-Z, a-z, 1-9, dash, and underscore are allowed in playernames
+	-- Only A-Z, a-z, 1-9, dash, and underscore are allowed in player names
 	"A4",
 	"B8",
 	"COco0",
