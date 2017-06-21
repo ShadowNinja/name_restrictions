@@ -18,6 +18,22 @@ exemptions[minetest.setting_get("name")] = true
 exemptions["singleplayer"] = true
 
 
+local function player_exempted(name)
+	-- Allow specifically exempted players
+	if exemptions[name] then
+		return true
+	end
+
+	-- Allow players that already exist
+	local auth = minetest.get_auth_handler()
+	if auth.get_auth(name) then
+		return true
+	end
+
+	return false
+end
+
+
 ---------------------
 -- Simple matching --
 ---------------------
@@ -35,7 +51,7 @@ local disallowed = {
 }
 
 minetest.register_on_prejoinplayer(function(name, ip)
-	if exemptions[name] then return end
+	if player_exempted(name) then return end
 
 	-- Check for disallowed names
 	local lname = name:lower()
@@ -52,7 +68,7 @@ end)
 ------------------------
 
 minetest.register_on_prejoinplayer(function(name, ip)
-	if exemptions[name] then return end
+	if player_exempted(name) then return end
 
 	-- Check for used names
 	local lname = name:lower()
@@ -129,7 +145,7 @@ all_chars = all_chars .. "]"
 
 
 minetest.register_on_prejoinplayer(function(name, ip)
-	if exemptions[name] then return end
+	if player_exempted(name) then return end
 
 	-- String off dashes and underscores from the start and end of the name.
 	local stripped_name = name:match("^[_-]*(.-)[_-]*$")
@@ -157,7 +173,7 @@ end)
 local min_name_len = tonumber(minetest.setting_get("name_restrictions.minimum_name_length")) or 3
 
 minetest.register_on_prejoinplayer(function(name, ip)
-	if exemptions[name] then return end
+	if player_exempted(name) then return end
 
 	if #name < min_name_len then
 		return "Your player name is too short, please try a longer name."
@@ -220,7 +236,7 @@ end
 local pronounceability = tonumber(minetest.setting_get("name_restrictions.pronounceability"))
 if pronounceability then
 	minetest.register_on_prejoinplayer(function(name, ip)
-		if exemptions[name] then return end
+		if player_exempted(name) then return end
 
 		if not pronounceable(pronounceability, name) then
 			return "Your player name does not seem to be pronounceable."
