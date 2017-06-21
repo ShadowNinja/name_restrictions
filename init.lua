@@ -131,8 +131,14 @@ all_chars = all_chars .. "]"
 minetest.register_on_prejoinplayer(function(name, ip)
 	if exemptions[name] then return end
 
+	-- String off dashes and underscores from the start and end of the name.
+	local stripped_name = name:match("^[_-]*(.-)[_-]*$")
+	if not stripped_name or stripped_name == "" then
+		return "Your name is composed solely of whitespace-like characters."
+	end
+
 	-- Generate a regular expression to match all similar names
-	local re = name:gsub(all_chars, char_map)
+	local re = stripped_name:gsub(all_chars, char_map)
 	re = "^[_-]*" .. re .. "[_-]*$"
 
 	for authName, _ in pairs(minetest.auth_table) do
