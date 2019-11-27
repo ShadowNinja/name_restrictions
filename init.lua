@@ -76,7 +76,7 @@ minetest.register_chatcommand("choosecase", {
 		local lname = params:lower()
 		local worldpath = minetest.get_worldpath()
 		local auth = minetest.get_auth_handler()
-		for iname in pairs(auth.iterate) do
+		for iname in pairs(auth.iterate()) do
 			if iname:lower() == lname and iname ~= params then
 				auth.delete_auth(iname)
 				assert(not iname:find("[/\\]"))
@@ -144,7 +144,7 @@ minetest.register_on_prejoinplayer(function(name, ip)
 	re = "^[_-]*" .. re .. "[_-]*$"
 
 	local auth = minetest.get_auth_handler()
-	for authName in pairs(auth.iterate) do
+	for authName in pairs(auth.iterate()) do
 		if authName ~= name and authName:match(re) then
 			return "Your name is too similar to another player's name."
 		end
