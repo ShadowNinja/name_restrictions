@@ -67,21 +67,6 @@ end)
 -- Case-insensitivity --
 ------------------------
 
-minetest.register_on_prejoinplayer(function(name, ip)
-	if player_exempted(name) then return end
-
-	-- Check for used names
-	local lname = name:lower()
-	for iname, data in pairs(minetest.auth_table) do
-		if iname:lower() == lname and iname ~= name then
-			return "Sorry, someone else is already using this"
-				.." name.  Please pick another name."
-				.."  Annother possibility is that you used the"
-				.." wrong case for your name."
-		end
-	end
-end)
-
 -- Compatability, for old servers with conflicting players
 minetest.register_chatcommand("choosecase", {
 	description = "Choose the casing that a player name should have.",
@@ -90,9 +75,10 @@ minetest.register_chatcommand("choosecase", {
 	func = function(name, params)
 		local lname = params:lower()
 		local worldpath = minetest.get_worldpath()
-		for iname, data in pairs(minetest.auth_table) do
+		local auth = minetest.get_auth_handler()
+		for iname, data in pairs(auth.iterate) do
 			if iname:lower() == lname and iname ~= params then
-				minetest.auth_table[iname] = nil
+				auth.delete_auth(iname)
 				assert(not iname:find("[/\\]"))
 				os.remove(worldpath.."/players/"..iname)
 			end
@@ -157,7 +143,8 @@ minetest.register_on_prejoinplayer(function(name, ip)
 	local re = stripped_name:gsub(all_chars, char_map)
 	re = "^[_-]*" .. re .. "[_-]*$"
 
-	for authName, _ in pairs(minetest.auth_table) do
+	local auth = minetest.get_auth_handler()
+	for authName, _ in pairs(auth.iterate) do
 		if authName ~= name and authName:match(re) then
 			return "Your name is too similar to another player's name."
 		end
